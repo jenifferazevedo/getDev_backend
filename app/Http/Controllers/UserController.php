@@ -7,21 +7,24 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index($request)
     {
-        $users = User::all();
+        if ($request == 'active') $users = User::paginate(10);
+        else if ($request == 'deleted') $users = User::onlyTrashed()->paginate(10);
+        else if ($request == 'all') $users = User::withTrashed()->paginate(10);
+        else $users = User::paginate(10);
         return response()->json($users, 200);
     }
 
     public function indexTrashed()
     {
-        $users = User::onlyTrashed()->get();
+        $users = User::onlyTrashed()->paginate(10);
         return response()->json($users, 200);
     }
 
     public function indexAll()
     {
-        $users = User::withTrashed()->paginate(2);
+        $users = User::withTrashed()->paginate(10);
         return response()->json($users, 200);
     }
 

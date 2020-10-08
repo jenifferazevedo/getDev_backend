@@ -32,7 +32,7 @@ Route::group([
         'middleware' => 'isAdmin',
         'prefix' => 'admin'
     ], function () {
-        Route::get('users', 'UserController@index');
+        Route::get('users/{request}', 'UserController@index');
         Route::get('users/all', 'UserController@indexAll');
         Route::get('users/trashed', 'UserController@indexTrashed');
         Route::post('show/user', 'UserController@show');
