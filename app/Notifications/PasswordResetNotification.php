@@ -43,8 +43,7 @@ class PasswordResetNotification extends Notification
      */
     public function toMail($notifiable)
     {
-        $email = Crypt::encryptString($notifiable->email);
-        $urlToResetForm = "..../?token=" . $this->token . "&email=" . $email;
+        $urlToResetForm = "..../?token=" . $this->token . "&email=" . $notifiable->email;
         return (new MailMessage)
             ->subject(Lang::get('Reset Password Notification'))
             ->line(Lang::get('You are receiving this email because we received a password reset request for your account.'))

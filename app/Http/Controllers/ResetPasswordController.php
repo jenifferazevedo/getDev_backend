@@ -10,7 +10,9 @@ use Illuminate\Validation\ValidationException;
 
 use App\Providers\RouteServiceProvider;
 use App\User;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Password;
 
 class ResetPasswordController extends Controller
@@ -52,11 +54,4 @@ class ResetPasswordController extends Controller
 
         return response()->json(['error' => trans($response)], 422);
     }
-
-    /**
-     * Reset the given user's password.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
-     */
 }
