@@ -14,6 +14,29 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::post('register', 'AuthController@register');
+Route::post('login', 'AuthController@login');
+Route::post('password/email', 'ForgotPasswordController@sendResetLinkEmail');
+Route::post('password/reset', 'ResetPasswordController@reset');
+//Route::post('password/byemail', 'AuthController@getUserByToken');
+
+
+Route::group([
+    'middleware' => 'apiJWT',
+    'prefix' => 'auth'
+], function () {
+    Route::get('user', 'AuthController@getAuthUser');
+    Route::post('logout', 'AuthController@logout');
+
+    Route::group([
+        'middleware' => 'isAdmin',
+        'prefix' => 'admin'
+    ], function () {
+        Route::get('users', 'UserController@index');
+        Route::get('users/all', 'UserController@indexAll');
+        Route::get('users/trashed', 'UserController@indexTrashed');
+        Route::post('show/user', 'UserController@show');
+        Route::post('update/user', 'UserController@update');
+        Route::post('delete/user', 'UserController@delete');
+    });
 });
