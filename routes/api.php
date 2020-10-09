@@ -27,16 +27,18 @@ Route::group([
 ], function () {
     Route::get('user', 'AuthController@getAuthUser');
     Route::post('logout', 'AuthController@logout');
+    Route::post('update/user', 'UserController@update');
+    Route::post('delete/user', 'UserController@delete');
 
     Route::group([
         'middleware' => 'isAdmin',
         'prefix' => 'admin'
     ], function () {
-        Route::get('users/{request}', 'UserController@index');
-        Route::get('users/all', 'UserController@indexAll');
-        Route::get('users/trashed', 'UserController@indexTrashed');
+        Route::get('users/{request?}/{name?}/{email?}', 'UserController@indexQuery')->name('usersIndex');
+
+
         Route::post('show/user', 'UserController@show');
-        Route::post('update/user', 'UserController@update');
-        Route::post('delete/user', 'UserController@delete');
+        Route::post('delete/permanent/user', 'UserController@destroy');
+        Route::post('restore/user', 'UserController@restore');
     });
 });
