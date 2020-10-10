@@ -34,9 +34,7 @@ Route::group([
         'middleware' => 'isAdmin',
         'prefix' => 'admin'
     ], function () {
-        Route::get('users/{request?}/{name?}/{email?}', 'UserController@indexQuery')->name('usersIndex');
-
-
+        Route::get('users/{request?}/{name?}/{email?}', 'UserController@index');
         Route::post('show/user', 'UserController@show');
         Route::post('delete/permanent/user', 'UserController@destroy');
         Route::post('restore/user', 'UserController@restore');

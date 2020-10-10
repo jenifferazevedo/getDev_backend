@@ -32,7 +32,7 @@ class AuthController extends Controller
         $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
-        $user->role = $request->role;
+        $user->role = $request->role ?? '0';
         $user->password = bcrypt($request->password);
         $user->saveOrFail();
         /*
@@ -68,11 +68,19 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getUsers()
+
+    public function getAuthUser(Request $request)
     {
-        return response()->json(User::all());
+        $user = JWTAuth::authenticate();
+
+        return response()->json(['user' => $user]);
     }
 
+    public function getUserByToken($token)
+    {
+        $user = JWTAuth::parseToken($token)->authenticate();
+        return response()->json(['email' => $user->email]);
+    }
     /**
      * Log the user out (Invalidate the token).
      *
@@ -96,18 +104,6 @@ class AuthController extends Controller
         }
     }
 
-    public function getAuthUser(Request $request)
-    {
-        $user = JWTAuth::authenticate();
-
-        return response()->json(['user' => $user]);
-    }
-
-    public function getUserByToken($token)
-    {
-        $user = JWTAuth::parseToken($token)->authenticate();
-        return response()->json(['email' => $user->email]);
-    }
     /**
      * Refresh a token.
      *

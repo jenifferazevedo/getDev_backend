@@ -10,24 +10,12 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
-    public function index($request)
+    public function index($request, $name = null, $email = null)
     {
-        if ($request == 'active') $users = User::paginate(10);
-        else if ($request == 'deleted') $users = User::onlyTrashed()->paginate(10);
-        else if ($request == 'all') $users = User::withTrashed()->paginate(10);
+        if ($request == 'active') $users = User::where('name', 'LIKE', '%' . $name . '%')->where('email', 'LIKE', '%' . $email . '%')->paginate(10);
+        else if ($request == 'deleted') $users = User::onlyTrashed()->where('name', 'LIKE', '%' .  $name . '%')->where('email', 'LIKE', '%' . $email . '%')->paginate(10);
+        else if ($request == 'all') $users = User::withTrashed()->where('name', 'LIKE', '%' .  $name . '%')->where('email', 'LIKE', '%' . $email . '%')->paginate(10);
         else $users = User::paginate(10);
-        return response()->json($users, 200);
-    }
-
-    public function indexTrashed()
-    {
-        $users = User::onlyTrashed()->paginate(10);
-        return response()->json($users, 200);
-    }
-
-    public function indexAll()
-    {
-        $users = User::withTrashed()->paginate(10);
         return response()->json($users, 200);
     }
 
@@ -57,7 +45,7 @@ class UserController extends Controller
         $user = [
             'name' => $request->name,
             'email' => $request->email,
-            'role' => $request->role,
+            'role' => $request->role ?? '0',
             'password' => bcrypt($request->password),
         ];
 
@@ -140,15 +128,5 @@ class UserController extends Controller
         return response()->json([
             "message" => 'Restored user successfully'
         ], 200);
-    }
-
-
-    public function indexQuery($request, $name = null, $email = null)
-    {
-        if ($request == 'active') $users = User::where('name', 'LIKE', '%' . $name . '%')->where('email', 'LIKE', '%' . $email . '%')->paginate(10);
-        else if ($request == 'deleted') $users = User::onlyTrashed()->where('name', 'LIKE', '%' .  $name . '%')->where('email', 'LIKE', '%' . $email . '%')->paginate(10);
-        else if ($request == 'all') $users = User::withTrashed()->where('name', 'LIKE', '%' .  $name . '%')->where('email', 'LIKE', '%' . $email . '%')->paginate(10);
-        else $users = User::paginate(10);
-        return response()->json($users, 200);
     }
 }
