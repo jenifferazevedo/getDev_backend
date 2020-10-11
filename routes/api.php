@@ -20,7 +20,8 @@ Route::post('password/email', 'ForgotPasswordController@sendResetLinkEmail');
 Route::post('password/reset', 'ResetPasswordController@reset');
 
 Route::get('locations', 'LocationController@index');
-Route::get('companies/{name?}/{location?}', 'CompanyController@indexQuery');
+Route::post('companies', 'CompanyController@indexQuery');
+Route::post('companies/show', 'CompanyController@show');
 
 
 Route::group([
@@ -37,6 +38,9 @@ Route::group([
 
     Route::get('user/companies', 'CompanyController@indexByUser');
     Route::post('company/store', 'CompanyController@store');
+    Route::post('company/update', 'CompanyController@update');
+    Route::post('company/delete', 'CompanyController@delete');
+
 
     Route::group([
         'middleware' => 'isAdmin',
@@ -70,5 +74,8 @@ Route::group([
         Route::post('knowledge-area/delete', 'KnowledgeAreaController@delete');
         Route::post('knowledge-area/restore', 'KnowledgeAreaController@restore');
         Route::post('knowledge-area/delete/permanent', 'KnowledgeAreaController@destroy');
+
+        Route::post('company/restore', 'CompanyController@restore');
+        Route::post('company/delete/permanent', 'CompanyController@destroy');
     });
 });

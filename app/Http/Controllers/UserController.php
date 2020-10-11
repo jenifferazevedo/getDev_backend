@@ -17,18 +17,18 @@ class UserController extends Controller
             $searchData = $request->name ? $request->name : $request->email;
 
             if ($request->email && $request->name) {
-                if ($type == 'active') $users = User::where('name', 'LIKE', '%' . $request->name . '%')->where('email', 'LIKE', '%' . $request->email . '%')->paginate(10);
-                else if ($type == 'deleted') $users = User::onlyTrashed()->where('name', 'LIKE', '%' .  $request->name . '%')->where('email', 'LIKE', '%' . $request->email . '%')->paginate(10);
-                else if ($type == 'all') $users = User::withTrashed()->where('name', 'LIKE', '%' .  $request->name . '%')->where('email', 'LIKE', '%' . $request->email . '%')->paginate(10);
-                else $users = User::where('name', 'LIKE', '%' . $request->name . '%')->where('email', 'LIKE', '%' . $request->email . '%')->paginate(10);
+                if ($type == 'active') $users = User::with(['companies'])->where('name', 'LIKE', '%' . $request->name . '%')->where('email', 'LIKE', '%' . $request->email . '%')->paginate(10);
+                else if ($type == 'deleted') $users = User::with(['companies'])->onlyTrashed()->where('name', 'LIKE', '%' .  $request->name . '%')->where('email', 'LIKE', '%' . $request->email . '%')->paginate(10);
+                else if ($type == 'all') $users = User::with(['companies'])->withTrashed()->where('name', 'LIKE', '%' .  $request->name . '%')->where('email', 'LIKE', '%' . $request->email . '%')->paginate(10);
+                else $users = User::with(['companies'])->where('name', 'LIKE', '%' . $request->name . '%')->where('email', 'LIKE', '%' . $request->email . '%')->paginate(10);
             } else {
-                if ($type == 'active') $users = User::where($search, 'LIKE', '%' . $searchData . '%')->paginate(10);
-                else if ($type == 'deleted') $users = User::onlyTrashed()->where($search, 'LIKE', '%' . $searchData . '%')->paginate(10);
-                else if ($type == 'all') $users = User::withTrashed()->where($search, 'LIKE', '%' .  $searchData . '%')->paginate(10);
-                else $users = User::where('name', 'LIKE', '%' . $request->name . '%')->where('email', 'LIKE', '%' . $request->email . '%')->paginate(10);
+                if ($type == 'active') $users = User::with(['companies'])->where($search, 'LIKE', '%' . $searchData . '%')->paginate(10);
+                else if ($type == 'deleted') $users = User::with(['companies'])->onlyTrashed()->where($search, 'LIKE', '%' . $searchData . '%')->paginate(10);
+                else if ($type == 'all') $users = User::with(['companies'])->withTrashed()->where($search, 'LIKE', '%' .  $searchData . '%')->paginate(10);
+                else $users = User::with(['companies'])->where('name', 'LIKE', '%' . $request->name . '%')->where($search, 'LIKE', '%' .  $searchData . '%')->paginate(10);
             }
         } else {
-            $users = User::paginate(10);
+            $users = User::with(['companies'])->paginate(10);
         }
 
         return response()->json([
@@ -42,7 +42,7 @@ class UserController extends Controller
         $request->validate([
             "id" => 'required'
         ]);
-        $user = User::find($request->id);
+        $user = User::with(['companies'])->find($request->id);
         if (!$user) {
             return response()->json([
                 'message' => 'User does not exist'

@@ -8,11 +8,13 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Iatstuti\Database\Support\CascadeSoftDeletes as SupportCascadeSoftDeletes;
 
 class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
     use SoftDeletes;
+    use SupportCascadeSoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -73,6 +75,10 @@ class User extends Authenticatable implements JWTSubject
     {
         $this->notify(new PasswordResetNotification($token));
     }
+
+    protected $cascadeDeletes = ['companies'];
+
+    protected $dates = ['deleted_at'];
 
     public function companies()
     {

@@ -26,9 +26,21 @@ class CompanyController extends Controller
         ], 200);
     }
 
-    public function indexQuery($name = null, $location = null)
+    public function indexQuery(Request $request)
     {
-        $companies = Company::where('name', 'LIKE', '%' . $name . '%')->where('location_id', $location);
+        if ($request) {
+            $search = $request->name ? 'name' : 'location_id';
+            $searchData = $request->name ? $request->name : $request->location_id;
+
+            if ($request->location && $request->name) {
+                $companies = Company::with(['location'])->where('name', 'LIKE', '%' .  $request->name . '%')->where('location_id', $request->location_id)->paginate(10);
+            } else {
+                $companies = Company::with(['location'])->where($search, 'LIKE', '%' .  $searchData . '%')->paginate(10);
+            }
+        } else {
+            $companies = Company::with(['location'])->paginate(10);
+        }
+
         return response()->json([
             'success' => true,
             'data' => $companies
@@ -37,10 +49,10 @@ class CompanyController extends Controller
 
     public function indexAdminQuery($request, $name = null, $location = null)
     {
-        if ($request == 'active') $companies = Company::where('name', 'LIKE', '%' . $name . '%')->where('location_id', $location)->get();
-        else if ($request == 'deleted') $companies = Company::onlyTrashed()->where('name', 'LIKE', '%' .  $name . '%')->where('location_id', $location)->get();
-        else if ($request == 'all') $companies = Company::withTrashed()->where('name', 'LIKE', '%' .  $name . '%')->where('location_id', $location)->get();
-        else $companies = Company::all();
+        if ($request == 'active') $companies = Company::with(['location'])->where('name', 'LIKE', '%' . $name . '%')->where('location_id', $location)->get();
+        else if ($request == 'deleted') $companies = Company::with(['location'])->onlyTrashed()->where('name', 'LIKE', '%' .  $name . '%')->where('location_id', $location)->get();
+        else if ($request == 'all') $companies = Company::with(['location'])->withTrashed()->where('name', 'LIKE', '%' .  $name . '%')->where('location_id', $location)->get();
+        else $companies = Company::with(['location'])->all();
 
         return response()->json([
             'success' => true,
@@ -92,7 +104,7 @@ class CompanyController extends Controller
         $request->validate([
             "id" => 'required'
         ]);
-        $company = Company::find($request->id);
+        $company = Company::with(['location'])->find($request->id);
         if (!$company) {
             return response()->json([
                 'message' => 'Company does not exist'
@@ -115,12 +127,11 @@ class CompanyController extends Controller
     {
         $request->validate([
             'id' => 'required',
-            'user_id' => 'required'
         ]);
 
         $company = Company::find($request->id);
         if (Auth::user()->role === 0) {
-            if (Str::is(Auth::user()->id, $request->user_id)) {
+            if (Str::is(Auth::user()->id, $company->user_id)) {
                 $company->update($request->all());
             } else return response()->json(['error' => 'Unauthorized'], 403);
         } else {
@@ -138,9 +149,16 @@ class CompanyController extends Controller
     public function delete(Request $request)
     {
         $request->validate([
-            "id" => 'required'
+            "id" => 'required',
         ]);
-        Company::find($request->id)->delete();
+        $company = Company::find($request->id);
+        if (Auth::user()->role === 0) {
+            if (Str::is(Auth::user()->id, $company->user_id)) {
+                $company->delete();
+            } else return response()->json(['error' => 'Unauthorized'], 403);
+        } else {
+            $company->delete();
+        }
         return response()->json([
             "message" => 'Company deleted successfully'
         ], 200);
