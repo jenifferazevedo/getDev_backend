@@ -24,6 +24,7 @@ class CreateCompaniesTable extends Migration
             $table->string('linkedin');
             $table->string('morada');
             $table->integer('location_id');
+            $table->integer('status_id');
             $table->timestamps();
             $table->softDeletes();
         });
