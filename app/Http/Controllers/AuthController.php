@@ -42,7 +42,7 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'data' => $user
-        ], 201);
+        ], 200);
     }
     /**
      * Get a JWT via given credentials.
@@ -73,14 +73,12 @@ class AuthController extends Controller
     {
         $user = JWTAuth::authenticate();
 
-        return response()->json(['user' => $user]);
+        return response()->json([
+            'success' => true,
+            'data' => $user
+        ], 200);
     }
 
-    public function getUserByToken($token)
-    {
-        $user = JWTAuth::parseToken($token)->authenticate();
-        return response()->json(['email' => $user->email]);
-    }
     /**
      * Log the user out (Invalidate the token).
      *
@@ -95,7 +93,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'User logged out successfully'
-            ]);
+            ], 200);
         } catch (JWTException $exception) {
             return response()->json([
                 'success' => false,
@@ -132,6 +130,6 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => JWTAuth::factory()->getTTL()
-        ]);
+        ], 200);
     }
 }

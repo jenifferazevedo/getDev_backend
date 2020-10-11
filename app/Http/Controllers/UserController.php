@@ -10,13 +10,31 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
-    public function index($request, $name = null, $email = null)
+    public function index($type = null, Request $request)
     {
-        if ($request == 'active') $users = User::where('name', 'LIKE', '%' . $name . '%')->where('email', 'LIKE', '%' . $email . '%')->paginate(10);
-        else if ($request == 'deleted') $users = User::onlyTrashed()->where('name', 'LIKE', '%' .  $name . '%')->where('email', 'LIKE', '%' . $email . '%')->paginate(10);
-        else if ($request == 'all') $users = User::withTrashed()->where('name', 'LIKE', '%' .  $name . '%')->where('email', 'LIKE', '%' . $email . '%')->paginate(10);
-        else $users = User::paginate(10);
-        return response()->json($users, 200);
+        if ($request) {
+            $search = $request->name ? 'name' : 'email';
+            $searchData = $request->name ? $request->name : $request->email;
+
+            if ($request->email && $request->name) {
+                if ($type == 'active') $users = User::where('name', 'LIKE', '%' . $request->name . '%')->where('email', 'LIKE', '%' . $request->email . '%')->paginate(10);
+                else if ($type == 'deleted') $users = User::onlyTrashed()->where('name', 'LIKE', '%' .  $request->name . '%')->where('email', 'LIKE', '%' . $request->email . '%')->paginate(10);
+                else if ($type == 'all') $users = User::withTrashed()->where('name', 'LIKE', '%' .  $request->name . '%')->where('email', 'LIKE', '%' . $request->email . '%')->paginate(10);
+                else $users = User::where('name', 'LIKE', '%' . $request->name . '%')->where('email', 'LIKE', '%' . $request->email . '%')->paginate(10);
+            } else {
+                if ($type == 'active') $users = User::where($search, 'LIKE', '%' . $searchData . '%')->paginate(10);
+                else if ($type == 'deleted') $users = User::onlyTrashed()->where($search, 'LIKE', '%' . $searchData . '%')->paginate(10);
+                else if ($type == 'all') $users = User::withTrashed()->where($search, 'LIKE', '%' .  $searchData . '%')->paginate(10);
+                else $users = User::where('name', 'LIKE', '%' . $request->name . '%')->where('email', 'LIKE', '%' . $request->email . '%')->paginate(10);
+            }
+        } else {
+            $users = User::paginate(10);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $users
+        ], 200);
     }
 
     public function show(Request $request)
@@ -30,7 +48,10 @@ class UserController extends Controller
                 'message' => 'User does not exist'
             ], 404);
         }
-        return response()->json($user, 200);
+        return response()->json([
+            'success' => true,
+            'data' => $user
+        ], 200);
     }
 
     public function update(Request $request)
@@ -63,7 +84,6 @@ class UserController extends Controller
                 User::find($request->id)->update($user);
             }
         }
-
 
         return response()->json([
             'success' => true,
