@@ -33,12 +33,12 @@ class CompanyController extends Controller
             $searchData = $request->name ? $request->name : $request->location_id;
 
             if ($request->location && $request->name) {
-                $companies = Company::with(['location'])->where('name', 'LIKE', '%' .  $request->name . '%')->where('location_id', $request->location_id)->paginate(10);
+                $companies = Company::with(['location', 'status'])->where('name', 'LIKE', '%' .  $request->name . '%')->where('location_id', $request->location_id)->paginate(10);
             } else {
-                $companies = Company::with(['location'])->where($search, 'LIKE', '%' .  $searchData . '%')->paginate(10);
+                $companies = Company::with(['location', 'status'])->where($search, 'LIKE', '%' .  $searchData . '%')->paginate(10);
             }
         } else {
-            $companies = Company::with(['location'])->paginate(10);
+            $companies = Company::with(['location', 'status'])->paginate(10);
         }
 
         return response()->json([
@@ -49,10 +49,10 @@ class CompanyController extends Controller
 
     public function indexAdminQuery($request, $name = null, $location = null)
     {
-        if ($request == 'active') $companies = Company::with(['location'])->where('name', 'LIKE', '%' . $name . '%')->where('location_id', $location)->get();
-        else if ($request == 'deleted') $companies = Company::with(['location'])->onlyTrashed()->where('name', 'LIKE', '%' .  $name . '%')->where('location_id', $location)->get();
-        else if ($request == 'all') $companies = Company::with(['location'])->withTrashed()->where('name', 'LIKE', '%' .  $name . '%')->where('location_id', $location)->get();
-        else $companies = Company::with(['location'])->all();
+        if ($request == 'active') $companies = Company::with(['location', 'status'])->where('name', 'LIKE', '%' . $name . '%')->where('location_id', $location)->get();
+        else if ($request == 'deleted') $companies = Company::with(['location', 'status'])->onlyTrashed()->where('name', 'LIKE', '%' .  $name . '%')->where('location_id', $location)->get();
+        else if ($request == 'all') $companies = Company::with(['location', 'status'])->withTrashed()->where('name', 'LIKE', '%' .  $name . '%')->where('location_id', $location)->get();
+        else $companies = Company::with(['location', 'status'])->all();
 
         return response()->json([
             'success' => true,
@@ -78,18 +78,19 @@ class CompanyController extends Controller
      */
     public function store(CompanyRequest $request)
     {
+        $company = new Company($request->all());
+        $company->status_id =  $request->status_id ? $request->status_id : 3;
         if (Auth::user()->role === 0) {
             if (Str::is(Auth::user()->id, $request->user_id)) {
-                $company = new Company($request->all());
                 $company->saveOrFail();
             } else return response()->json(['error' => 'Unauthorized'], 403);
         } else {
-            $company = new Company($request->all());
             $company->saveOrFail();
         }
+        $companyStored = Company::with(['location', 'status'])->find($company->id);
         return response()->json([
             'success' => true,
-            'data' => $company
+            'data' => $companyStored
         ], 200);
     }
 

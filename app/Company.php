@@ -9,11 +9,11 @@ class Company extends Model
 {
     use SoftDeletes;
     protected $fillable = [
-        'user_id', 'name', 'logo', 'description', 'site', 'email', 'linkedin', 'morada', 'location_id'
+        'user_id', 'name', 'logo', 'description', 'site', 'email', 'linkedin', 'morada', 'location_id', 'status_id'
     ];
 
     protected $hidden = [
-        'user_id', 'location_id'
+        'user_id', 'location_id', 'status_id'
     ];
 
     public function user()
@@ -24,5 +24,10 @@ class Company extends Model
     public function location()
     {
         return $this->belongsTo(Location::class);
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(Status::class);
     }
 }
